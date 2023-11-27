@@ -2,6 +2,7 @@ import streamlit as st
 from pytube import YouTube
 from stqdm import stqdm
 import os
+from pathlib import Path
 
 def sanitize_filename(filename):
     invalid_chars = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
@@ -39,15 +40,18 @@ def download_video(url, resolution):
             # Get the file size for progress calculation
             total_size = stream.filesize
 
+            # Specify the downloads folder in the user's home directory
+            downloads_folder = Path(os.path.expanduser("~")) / "Downloads"
+
             # Use stqdm to create a progress bar
             with stqdm(total=total_size, desc=f"Downloading {filename}", unit="B", unit_scale=True, unit_divisor=1024) as bar:
-                # Download the video
-                stream.download(output_path=os.path.join(os.path.expanduser("~"), "Downloads"), filename=filename)
+                # Download the video to the common downloads folder
+                stream.download(output_path=downloads_folder, filename=filename)
                 # Update the progress bar in the Streamlit app
                 bar.update(total_size)
 
         # Display success message
-        st.success("✅ Download successful! Check your downloads folder.")
+        st.success(f"✅ Download successful! The video is saved in the Downloads folder as: {filename}")
     except Exception as e:
         # Display error message if an exception occurs
         st.error(f"❌ An error occurred: {e}")
